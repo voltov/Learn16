@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 public class ProductsController : Controller
 {
@@ -17,11 +18,9 @@ public class ProductsController : Controller
 
     public IActionResult Create()
     {
-        var viewModel = new ProductViewModel
-        {
-            Categories = _productService.GetCategories(),
-            Suppliers = _productService.GetSuppliers()
-        };
+        var viewModel = new ProductViewModel();
+        ViewBag.Categories = new SelectList(_productService.GetCategories(), "CategoryID", "CategoryName");
+        ViewBag.Suppliers = new SelectList(_productService.GetSuppliers(), "SupplierID", "CompanyName");
         return View(viewModel);
     }
 
@@ -46,8 +45,8 @@ public class ProductsController : Controller
             _productService.AddProduct(product);
             return RedirectToAction(nameof(Index));
         }
-        viewModel.Categories = _productService.GetCategories();
-        viewModel.Suppliers = _productService.GetSuppliers();
+        ViewBag.Categories = new SelectList(_productService.GetCategories(), "CategoryID", "CategoryName");
+        ViewBag.Suppliers = new SelectList(_productService.GetSuppliers(), "SupplierID", "CompanyName");
         return View(viewModel);
     }
 
@@ -69,10 +68,10 @@ public class ProductsController : Controller
             UnitsInStock = product.UnitsInStock,
             UnitsOnOrder = product.UnitsOnOrder,
             ReorderLevel = product.ReorderLevel,
-            Discontinued = product.Discontinued,
-            Categories = _productService.GetCategories(),
-            Suppliers = _productService.GetSuppliers()
+            Discontinued = product.Discontinued
         };
+        ViewBag.Categories = new SelectList(_productService.GetCategories(), "CategoryID", "CategoryName");
+        ViewBag.Suppliers = new SelectList(_productService.GetSuppliers(), "SupplierID", "CompanyName");
         return View(viewModel);
     }
 
@@ -82,25 +81,27 @@ public class ProductsController : Controller
     {
         if (ModelState.IsValid)
         {
-            var product = new Product
+            var product = _productService.GetProductById(viewModel.ProductID);
+            if (product == null)
             {
-                ProductID = viewModel.ProductID,
-                ProductName = viewModel.ProductName,
-                SupplierID = viewModel.SupplierID,
-                CategoryID = viewModel.CategoryID,
-                QuantityPerUnit = viewModel.QuantityPerUnit,
-                UnitPrice = viewModel.UnitPrice,
-                UnitsInStock = viewModel.UnitsInStock,
-                UnitsOnOrder = viewModel.UnitsOnOrder,
-                ReorderLevel = viewModel.ReorderLevel,
-                Discontinued = viewModel.Discontinued
-            };
+                return NotFound();
+            }
+
+            product.ProductName = viewModel.ProductName;
+            product.SupplierID = viewModel.SupplierID;
+            product.CategoryID = viewModel.CategoryID;
+            product.QuantityPerUnit = viewModel.QuantityPerUnit;
+            product.UnitPrice = viewModel.UnitPrice;
+            product.UnitsInStock = viewModel.UnitsInStock;
+            product.UnitsOnOrder = viewModel.UnitsOnOrder;
+            product.ReorderLevel = viewModel.ReorderLevel;
+            product.Discontinued = viewModel.Discontinued;
+
             _productService.UpdateProduct(product);
             return RedirectToAction(nameof(Index));
         }
-        viewModel.Categories = _productService.GetCategories();
-        viewModel.Suppliers = _productService.GetSuppliers();
+        ViewBag.Categories = new SelectList(_productService.GetCategories(), "CategoryID", "CategoryName");
+        ViewBag.Suppliers = new SelectList(_productService.GetSuppliers(), "SupplierID", "CompanyName");
         return View(viewModel);
     }
 }
-

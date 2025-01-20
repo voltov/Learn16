@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 public class ProductViewModel
@@ -32,9 +30,4 @@ public class ProductViewModel
     public short ReorderLevel { get; set; }
 
     public bool Discontinued { get; set; }
-
-    [BindNever]
-    public IEnumerable<Category> Categories { get; set; }
-    [BindNever]
-    public IEnumerable<Supplier> Suppliers { get; set; }
 }
